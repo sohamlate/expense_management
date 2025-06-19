@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   ChevronDown,
@@ -24,6 +25,12 @@ export default function Home() {
   const [activeFaq, setActiveFaq] = useState(null);
   const [billingCycle, setBillingCycle] = useState('monthly');
   const parallaxRef = useRef(null);
+
+    const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/signin');
+  };
 
   // Features data with descriptions and icons
   const features = [
@@ -361,9 +368,12 @@ export default function Home() {
             </div>
 
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <button className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white shadow-md transition-shadow hover:shadow-lg">
-                Get Started
-              </button>
+              <button
+      onClick={handleClick}
+      className="rounded-lg bg-blue-600 px-5 py-2 font-medium text-white shadow-md transition-shadow hover:shadow-lg"
+    >
+      Get Started
+    </button>
             </motion.div>
           </div>
         </div>
