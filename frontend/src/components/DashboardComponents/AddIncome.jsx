@@ -27,7 +27,7 @@ const AddIncome = ({addIncome , setAddIncome}) => {
     console.log('Income Data:', formData);
     
     try {
-        const response = await axios.post("http://localhost:5000/api/transaction/income" , formData);
+        const response = await axios.post("https://expense-management-seven-plum.vercel.app/api/transaction/income" , formData);
         console.log(response);
         setAddIncome(!addIncome);
         

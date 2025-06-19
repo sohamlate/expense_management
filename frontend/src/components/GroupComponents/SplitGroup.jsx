@@ -38,7 +38,7 @@ const SplitGroup = ({ group, showSplit, setShowSplit }) => {
       const finalCategory = formData.category === 'Other' ? formData.otherCategory : formData.category;
       
       const response = await axios.post(
-        'http://localhost:5000/api/splits/create-split-group',
+        'https://expense-management-seven-plum.vercel.app/api/splits/create-split-group',
         {
           amount: formData.amount,
           description: formData.description,

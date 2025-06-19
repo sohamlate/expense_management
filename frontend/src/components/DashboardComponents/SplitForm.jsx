@@ -60,7 +60,7 @@ const SplitForm = ({ expense, showForm, setShowForm }) => {
     };
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/splits/create',
+        'https://expense-management-seven-plum.vercel.app/api/splits/create',
         payload
       );
     //   console.log(response);

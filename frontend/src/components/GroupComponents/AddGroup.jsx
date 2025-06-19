@@ -76,7 +76,7 @@ const AddGroup = ({ groupForm, setGroupForm }) => {
       return;
     }
     // console.log('Submitting group data:', groupData);
-    const response = await axios.post("http://localhost:5000/api/group" , groupData);
+    const response = await axios.post("https://expense-management-seven-plum.vercel.app/api/group" , groupData);
     console.log(response , "456");
     // Here you would typically send the data to your API
     setGroupForm(!groupForm);

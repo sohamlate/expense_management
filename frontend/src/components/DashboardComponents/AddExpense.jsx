@@ -36,7 +36,7 @@ const AddExpense = ({ addscreen, setAddscreen }) => {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/transaction/expense',
+        'https://expense-management-seven-plum.vercel.app/api/transaction/expense',
         expense
       );
       console.log(response);

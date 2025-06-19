@@ -17,7 +17,7 @@ const GroupComponent = () => {
 
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/group/user/${userId}`
+        `https://expense-management-seven-plum.vercel.app/api/group/user/${userId}`
       );
       setGroups(response.data.groups);
       console.log(response);

@@ -31,7 +31,7 @@ const SignIn = () => {
       setError("");
       
       // Send OTP
-      const response = await axios.post("http://localhost:5000/api/auth/send-otp", {
+      const response = await axios.post("https://expense-management-seven-plum.vercel.app/api/auth/send-otp", {
         email: userDetails.email,
       });
       
@@ -58,7 +58,7 @@ const SignIn = () => {
       setError("");
       console.log(userDetails);
       console.log(OTP);
-      const response = await axios.post("http://localhost:5000/api/auth/verify-otp", {
+      const response = await axios.post("https://expense-management-seven-plum.vercel.app/api/auth/verify-otp", {
         email: userDetails.email,
         otp : OTP,
       });
@@ -111,7 +111,7 @@ const SignIn = () => {
       const user = JSON.parse(localStorage.getItem('user'));
       const userid = user._id;
       console.log(userid);
-      const response = await axios.post("http://localhost:5000/api/auth/add-details", {
+      const response = await axios.post("https://expense-management-seven-plum.vercel.app/api/auth/add-details", {
         userId : userid,
         name: userDetails.name,
         mobile: userDetails.mobileNumber
@@ -137,7 +137,7 @@ const SignIn = () => {
       setLoading(true);
       setError("");
       
-      await axios.post("http://localhost:5000/api/auth/send-otp", {
+      await axios.post("https://expense-management-seven-plum.vercel.app/api/auth/send-otp", {
         email: userDetails.email,
       });
       

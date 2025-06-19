@@ -34,7 +34,7 @@ const GroupCard = ({ group }) => {
 
   const deletehandler = async() => {
     try {
-      const response = await axios.delete(`http://localhost:5000/api/group/${groupid}`);
+      const response = await axios.delete(`https://expense-management-seven-plum.vercel.app/api/group/${groupid}`);
       console.log(response);
     }
     catch(error) {
@@ -46,7 +46,7 @@ const GroupCard = ({ group }) => {
     if (!expanded) {
       setIsLoading(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/group/member/${groupid}`);
+        const response = await axios.get(`https://expense-management-seven-plum.vercel.app/api/group/member/${groupid}`);
         console.log(response, "groupmember");
         if (response.data) {
           setGroupMembers(response.data.members);

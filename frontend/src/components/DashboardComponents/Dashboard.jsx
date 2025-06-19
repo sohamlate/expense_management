@@ -170,7 +170,7 @@ Formatting:
   const getUserdata = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/auth/users/${userId}/full-data`
+        `https://expense-management-seven-plum.vercel.app/api/auth/users/${userId}/full-data`
       );
       setUserData(response.data);
       console.log(response.data, 546465456);
@@ -186,7 +186,7 @@ Formatting:
   const getOwedData = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/splits/getspiltdata',
+        'https://expense-management-seven-plum.vercel.app/api/splits/getspiltdata',
         { userId }
       );
       console.log(response, 35415313);
@@ -199,7 +199,7 @@ Formatting:
   const getSplits = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/splits/user/${userId}`
+        `https://expense-management-seven-plum.vercel.app/api/splits/user/${userId}`
       );
       console.log(response, 'skldjahsfd');
       setSplits(response.data);
@@ -222,7 +222,7 @@ Formatting:
   const getAllExpenses = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/transaction/getallexpense',
+        'https://expense-management-seven-plum.vercel.app/api/transaction/getallexpense',
         { userId }
       );
       setAllExpense(response.data);
@@ -234,7 +234,7 @@ Formatting:
   const getNavbarData = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/transaction/getdata',
+        'https://expense-management-seven-plum.vercel.app/api/transaction/getdata',
         { userId }
       );
       setTotalExpense(response.data.totalExpense);
@@ -249,7 +249,7 @@ Formatting:
   const getAllIncomes = async () => {
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/transaction/getallincome',
+        'https://expense-management-seven-plum.vercel.app/api/transaction/getallincome',
         { userId }
       );
       setAllIncome(response.data);
