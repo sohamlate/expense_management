@@ -161,6 +161,8 @@ class TransactionController {
       user.inProgressData.selectedTxnId = txn._id;
       user.inProgressData.tempDescription = ""; // optional init
       user.inProgressData.tempAmount = null;
+      user.inProgressData.tempType = "";
+      user.inProgressData.tempCategory = "";
       user.prevStateBeforeEdit = user.currState;
       user.currState = "TRANSACTION:EDIT_DESCRIPTION";
       user.markModified("inProgressData");
@@ -185,17 +187,43 @@ class TransactionController {
         return this.handler.sendMessage(user.chatId, "⚠️ Enter a valid amount (number > 0):");
       }
 
+      user.inProgressData.tempAmount = amount;
+      user.currState = "TRANSACTION:EDIT_TYPE";
+      user.markModified("inProgressData");
+      await user.save();
+
+
+       return this.handler.sendMessage(user.chatId, "🔄 Enter type: income or expense");
+     
+    }
+    else if (state === "EDIT_TYPE") {
+      const type = text.toLowerCase();
+      if (!["income", "expense"].includes(type)) {
+        return this.handler.sendMessage(user.chatId, "⚠️ Type must be 'income' or 'expense'.");
+      }
+
+      user.inProgressData.tempType = type;
+      user.currState = "TRANSACTION:EDIT_CATEGORY";
+      user.markModified("inProgressData");
+      await user.save();
+
+      return this.handler.sendMessage(user.chatId, "🗂 Enter category (e.g., food, rent, etc.):");
+    }
+    else if (state === "EDIT_CATEGORY") {
+      user.inProgressData.tempCategory = text;
       const txn = await Transaction.findById(user.inProgressData.selectedTxnId);
       if (!txn) {
         return this.handler.sendMessage(user.chatId, "❌ Transaction not found.");
       }
 
       txn.description = user.inProgressData.tempDescription;
-      txn.amount = amount;
+      txn.amount = user.inProgressData.tempAmount;
+      txn.type = user.inProgressData.tempType;
+      txn.category = user.inProgressData.tempCategory;
       await txn.save();
 
-      await this.handler.sendMessage(user.chatId, "✅ Description and amount updated!");
-      await this.handler.resetUserState(user);
+      await this.handler.sendMessage(user.chatId, "✅ Transaction updated successfully!");
+      return this.handler.resetUserState(user);
     }
 
   }
