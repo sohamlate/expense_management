@@ -82,7 +82,7 @@ class TransactionController {
       keyboard: [
         ["Last Month", "Last 6 Months"],
         ["Last Year", "All Time"],
-        ["/back"],
+        ["/main"],
       ],
       resize_keyboard: true,
     };
@@ -141,9 +141,11 @@ class TransactionController {
       await user.save();
       await this.showEditPage(user);
     } else if (state === "EDIT_SELECT") {
-      const selectedIndex = text.toLowerCase();
-      if (selectedIndex === "next") return this.handlePagination(user, "next");
-      if (selectedIndex === "prev") return this.handlePagination(user, "prev");
+      const selectedIndex = text.toLowerCase().trim();
+
+      
+      if (selectedIndex.includes("next")) return this.handlePagination(user, "next");
+      if (selectedIndex.includes("prev")) return this.handlePagination(user, "prev");
 
       const index = selectedIndex.charCodeAt(0) - 97; // 'a' to 0
       const txns = user.inProgressData.transactions;
@@ -155,28 +157,47 @@ class TransactionController {
       }
 
       const txn = txns[index];
+      console.log(txns, "priting haa haa");
       user.inProgressData.selectedTxnId = txn._id;
+      user.inProgressData.tempDescription = ""; // optional init
+      user.inProgressData.tempAmount = null;
+      user.prevStateBeforeEdit = user.currState;
       user.currState = "TRANSACTION:EDIT_DESCRIPTION";
+      user.markModified("inProgressData");
       await user.save();
 
       // Pause Gemini temporarily
-      user.prevStateBeforeEdit = user.currState;
-      await user.save();
+      // await user.save();
       console.log(user, "testing user");
 
       return this.handler.sendMessage(user.chatId, "✏️ Enter new description:");
     } else if (state === "EDIT_DESCRIPTION") {
-      const txn = await Transaction.findById(
-        user.inProgressData.selectedTxnId
-      );
+        console.log(user, "edit desciption");
+        user.inProgressData.tempDescription = text;
+        user.currState = "TRANSACTION:EDIT_AMOUNT";
+        user.markModified("inProgressData");
+        await user.save();
+        return this.handler.sendMessage(user.chatId, "💰 Enter new amount:");
+    }
+    else if (state === "EDIT_AMOUNT") {
+      const amount = parseFloat(text);
+      if (isNaN(amount) || amount <= 0) {
+        return this.handler.sendMessage(user.chatId, "⚠️ Enter a valid amount (number > 0):");
+      }
+
+      const txn = await Transaction.findById(user.inProgressData.selectedTxnId);
       if (!txn) {
         return this.handler.sendMessage(user.chatId, "❌ Transaction not found.");
       }
-      txn.description = text;
+
+      txn.description = user.inProgressData.tempDescription;
+      txn.amount = amount;
       await txn.save();
-      await this.handler.sendMessage(user.chatId, "✅ Description updated!");
+
+      await this.handler.sendMessage(user.chatId, "✅ Description and amount updated!");
       await this.handler.resetUserState(user);
     }
+
   }
 
   async showEditPage(user) {
@@ -213,6 +234,7 @@ class TransactionController {
     });
 
     buttons.push([{ text: "⬅️ Prev" }, { text: "➡️ Next" }]);
+    buttons.push([{ text: "/main" }]);
 
     await this.handler.sendMessage(user.chatId, msg, {
       keyboard: buttons,
