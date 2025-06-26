@@ -1,11 +1,12 @@
 const User = require("../models/user.model");
 const TransactionController = require("../bot.controllers/transaction.controller");
+const EditTransactionController  = require("../bot.controllers/edit.transaction.controller");
 const GroupController = require("../bot.controllers/group.controller");
 const SplitController = require("../bot.controllers/split.controller");
 const AuthController = require("../bot.controllers/auth.controller");
 const ViewTransactionController = require("../bot.controllers/viewTransaction.controller");
 const GeminiController = require("../bot.controllers/gemini.controller");
-const BudgetController = require("../bot.controllers/budget.controller");;
+const BudgetController = require("../bot.controllers/budget.controller");
 const logger = require("../config/logger");
 const axios = require("axios");
 
@@ -14,6 +15,7 @@ class UserHandler {
     this.botToken = botToken;
     this.controllers = {
       transaction: new TransactionController(this),
+      edit: new EditTransactionController(this),
       group: new GroupController(this),
       auth: new AuthController(this),
       budget: new BudgetController(this),
@@ -52,7 +54,7 @@ class UserHandler {
         return;
       }
 
-      if (!user) {
+      if (!user ) {
         return this.sendMessage(
           chatId,
           "⚠️ Please start by sending /start to begin registration"
@@ -67,22 +69,24 @@ class UserHandler {
 
       await this.handleStateInput(user, text);
     } catch (error) {
-      logger.error("Message handling error:", error);
+      console.log("Message handling error:", error);
       this.sendMessage(chatId, "❌ Error processing request");
     }
   }
 async handleCommand(user, command) {
+
+    
   const commandMap = {
     "/main": () => this.showMainMenu(user.chatId),
     "/add_expense": () => this.controllers.transaction.startAddExpense(user),
+    "/add_income": () => this.controllers.transaction.startAddIncome(user),
     "/split_expense": () => this.controllers.split.startSplitExpense(user),
-    "/edit_expense": () => this.controllers.transaction.startEditExpense(user),
+    "/edit_transaction": () => this.controllers.edit.startEditExpense(user),
     "/set_budget": () => this.controllers.budget.startSetBudget(user),
     "/create_group": () => this.controllers.group.startCreateGroup(user),
     "/view_transactions": () =>
       this.controllers.viewTransactions.showTimePeriodMenu(user),
     "/my_profile": () => this.controllers.auth.showProfile(user),
-    "/reminders": () => this.controllers.transaction.showReminders(user),
     "/logout": () => this.controllers.auth.logoutUser(user),
     "/back": () => this.handleBackAction(user),
     "/cancel": () => this.resetUserState(user),
@@ -90,6 +94,16 @@ async handleCommand(user, command) {
   };
 
   try {
+
+      if (!user || !user.isVerified) {
+        return this.sendMessage(
+          user.chatId,
+          "⚠️ Please start by sending /start to begin registration"
+        );
+      }
+
+
+
     if (commandMap[command]) {
       await commandMap[command]();
     } else {
@@ -111,9 +125,12 @@ async handleCommand(user, command) {
 
 
   async handleStateInput(user, text) {
+
     const [flow] = user.currState?.split(":") || [];
+
     const handlerMap = {
       TRANSACTION: () => this.controllers.transaction.handleInput(user, text),
+      EDIT: () => this.controllers.edit.handleInput(user, text),
       GROUP: () => this.controllers.group.handleInput(user, text),
       BUDGET: () => this.controllers.budget.handleInput(user, text),
       AUTH: () => this.controllers.auth.handleInput(user, text),
@@ -123,19 +140,32 @@ async handleCommand(user, command) {
         this.controllers.viewTransactions.handleInput(user, text),
     };
 
-    handlerMap[flow]
-      ? await handlerMap[flow]()
-      : this.sendMessage(
+    try {
+      if (handlerMap[flow]) {
+        await handlerMap[flow]();
+      } else {
+        await this.sendMessage(
           user.chatId,
           "❌ Invalid state",
           this.getMainKeyboard()
         );
+      }
+    } catch (err) {
+      console.error("Error handling user input:", err);
+      await this.sendMessage(
+        user.chatId,
+        "⚠️ An unexpected error occurred. Please try again later.",
+        this.getMainKeyboard()
+      );
+    }
+
   }
 
   async handleBackAction(user) {
     const [flow] = user.currState?.split(":") || [];
     const backHandlerMap = {
       TRANSACTION: () => this.controllers.transaction.handleBack(user),
+      EDIT: () => this.controllers.edit.handleBack(user),
       GROUP: () => this.controllers.group.handleBack(user),
       BUDGET: () => this.controllers.budget.handleBack(user),
       AUTH: () => this.controllers.auth.handleBack(user),
@@ -176,11 +206,11 @@ async handleCommand(user, command) {
   getMainKeyboard() {
     return {
       keyboard: [
-        ["/add_expense", "/split_expense"],
-        ["/edit_expense", "/set_budget"],
-        ["/create_group", "/view_transactions"],
-        ["/budget_advice", "/my_profile"],
-        ["/reminders", "/logout"],
+        ["/add_expense", "/add_income"],         
+        ["/split_expense", "/edit_transaction"],     
+        ["/set_budget", "/create_group"],         
+        ["/view_transactions", "/budget_advice"],
+        ["/my_profile", "/logout"]     
       ],
       resize_keyboard: true,
     };

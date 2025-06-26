@@ -26,47 +26,6 @@ const transactionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// transactionSchema.post("save", async function (doc) {
-//   try {
-//     if (doc.type === "expense") {
-//       const userId = doc.createdBy;
 
-//       // Aggregate total income and expense for the user
-//       const result = await mongoose.model("Transaction").aggregate([
-//         { $match: { createdBy: userId } },
-//         {
-//           $group: {
-//             _id: "$type",
-//             total: { $sum: "$amount" },
-//           },
-//         },
-//       ]);
-
-//       let totalIncome = 0;
-//       let totalExpense = 0;
-//       result.forEach((res) => {
-//         if (res._id === "income") totalIncome = res.total;
-//         if (res._id === "expense") totalExpense = res.total;
-//       });
-
-//       // Check if expenses exceed 80% of income
-//       if (totalExpense > totalIncome * 0.8) {
-//         const user = await mongoose.model("User").findById(userId);
-//         if (user?.chatId) {
-//           const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-//           await axios.post(
-//             `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
-//             {
-//               chat_id: user.chatId,
-//               text: ` Financial Alert: Your total expenses (${totalExpense}) exceed 80% of your total income (${totalIncome}). Please review your spending habits.`,
-//             }
-//           );
-//         }
-//       }
-//     }
-//   } catch (error) {
-//     console.error("Error processing transaction alert:", error);
-//   }
-// });
 
 module.exports = mongoose.model("Transaction", transactionSchema);
