@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+
 const AddIncome = ({addIncome , setAddIncome}) => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user._id || '';
@@ -18,7 +19,7 @@ const AddIncome = ({addIncome , setAddIncome}) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit =async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.amount || !formData.category) {
       alert('Amount and Category are required');
@@ -39,9 +40,21 @@ const AddIncome = ({addIncome , setAddIncome}) => {
       }
   };
 
+  const handleClose = () => {
+    setAddIncome(!addIncome);
+  };
+
   return (
-    <div className='fixed  inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-        <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded-lg">
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
+        <div className="p-4 max-w-md mx-auto bg-white shadow-md rounded-lg relative">
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl font-bold"
+        >
+          ×
+        </button>
+        
         <h2 className="text-xl font-semibold mb-4">Add Income</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
             <input

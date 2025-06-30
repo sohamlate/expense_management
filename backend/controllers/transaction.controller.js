@@ -1,6 +1,6 @@
 const Transaction = require("../models/transaction.model");
+const User = require("../models/user.model");
 const mongoose = require("mongoose");
-
 
 exports.getAllTransactions = async (req, res) => {
   try {
@@ -19,7 +19,6 @@ exports.getAllTransactions = async (req, res) => {
   }
 };
 
-
 exports.getAllIncome = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -36,7 +35,6 @@ exports.getAllIncome = async (req, res) => {
   }
 };
 
-
 exports.getAllExpense = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -52,8 +50,6 @@ exports.getAllExpense = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch expense transactions" });
   }
 };
-
-
 
 exports.getTransactionById = async (req, res) => {
   try {
@@ -73,16 +69,20 @@ exports.getTransactionById = async (req, res) => {
   }
 };
 
-
 exports.addExpense = async (req, res) => {
   try {
     const { amount, description, category, createdBy, splitType, splits } =
       req.body;
-
     if (!amount || !category || !createdBy || !splitType) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
+    const existingUser = await User.findById(createdBy);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    };
+    if(amount > existingUser.budget) {
+      return res.status(400).json({ message: "Expense exceeds budget" }); 
+    }
     const newExpense = new Transaction({
       amount,
       description,
@@ -100,7 +100,6 @@ exports.addExpense = async (req, res) => {
   }
 };
 
-
 exports.addIncome = async (req, res) => {
   try {
     const { amount, description, category, createdBy, splitType, splits } =
@@ -115,7 +114,7 @@ exports.addIncome = async (req, res) => {
       description,
       category,
       createdBy,
-    
+
       type: "income",
     });
 
@@ -126,10 +125,8 @@ exports.addIncome = async (req, res) => {
   }
 };
 
-
 exports.getUserTransactionSummary = async (req, res) => {
   try {
-   
     const userId = req.body.userId;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -161,5 +158,24 @@ exports.getUserTransactionSummary = async (req, res) => {
   } catch (error) {
     console.error("Error fetching transaction summary:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+exports.addBudget = async (req, res) => {
+  try {
+    const {userId , budget} = req.body;
+    console.log("Adding budget for user:", userId, "Budget:", budget);
+    if (!userId || !budget) {
+      return res.status(400).json({ message: "User ID and budget are required" });
+    }
+    const existingUser = await User.findById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    existingUser.budget = budget;
+    await existingUser.save();
+    res.status(200).json({ message: "Budget added successfully", budget });
+  } catch (e) {
+    console.log("Error adding budget");
+    console.error(e);
   }
 };
