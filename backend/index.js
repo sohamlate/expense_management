@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./cron-jobs/budgetReset');
 const express = require('express');
 const app = express();
 const connectDB = require('./config/database');

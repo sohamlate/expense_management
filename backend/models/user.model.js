@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
     name: {
       type: String,
     },
+    totalBudget: { type: Number, default: 0 },
     transactions: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Transaction" },
     ],

@@ -308,6 +308,7 @@ class AuthController {
       // Reset all authentication-related fields
       // user.isVerified = false;
       user.currState = this.states.INITIAL;
+      user.isVerified = false;
       // user.inProgressData = {};
       // user.email = undefined;
       // user.mobile = undefined;
