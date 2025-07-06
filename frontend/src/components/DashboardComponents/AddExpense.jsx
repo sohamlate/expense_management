@@ -4,6 +4,8 @@ import axios from 'axios';
 const AddExpense = ({ addscreen, setAddscreen }) => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userid = user._id || '';
+  const [localError, setLocalError] = useState('');
+
   const [expense, setExpense] = useState({
     amount: '',
     description: '',
@@ -41,22 +43,23 @@ const AddExpense = ({ addscreen, setAddscreen }) => {
       );
       console.log(response);
       setAddscreen(!addscreen);
-      // console.log('Transaction submitted successfully:', data);
-
-      // if (typeof setAddscreen === 'function') {
-      //   setAddscreen(false);
-      // }
     } catch (error) {
-      console.error(
-        'Error submitting transaction:',
-        error.response?.data?.message || error.message
-      );
+      const msg =
+        error.response?.data?.message || 'Expense Exceeds Budget';
+      setLocalError(msg);
+      console.error('Error submitting transaction:', msg);
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+
       <div className="mx-auto w-[23rem] rounded-lg border border-blue-800 bg-white p-6 text-black shadow-lg">
+      {localError && (
+        <div className="mb-4 rounded-md border border-red-400 bg-red-100 p-2 text-sm text-red-700">
+          {localError}
+        </div>
+      )}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-black">Add Expense</h2>
           <button

@@ -1,6 +1,6 @@
 import React from 'react';
 import { UserCircle, Mail, Phone, MapPin, Plus } from 'lucide-react';
-const UserProfile = ({addIncome , setAddIncome}) => {
+const UserProfile = ({addIncome , setAddIncome , budget , setBudget}) => {
   // Static user data
   let user = {
     name: "Alex Johnson",
@@ -17,7 +17,7 @@ const UserProfile = ({addIncome , setAddIncome}) => {
   return (
     <div className="w-[18rem] mx-auto bg-white rounded-lg shadow-md overflow-hidden">
       {/* Header with background */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-32 relative">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-20 relative">
         <div className="absolute -bottom-12 left-6">
           <div className="bg-white p-1 rounded-full">
             <div className="bg-gray-100 rounded-full h-24 w-24 flex items-center justify-center">
@@ -48,6 +48,9 @@ const UserProfile = ({addIncome , setAddIncome}) => {
         
         {/* Buttons */}
         <div className="flex flex-col gap-3">
+          <button onClick={() => setBudget(!budget)} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors">
+            Set Budget
+          </button>
           <button onClick={() => setAddIncome(!addIncome)} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors">
             Add Income
           </button>

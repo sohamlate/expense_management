@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ReactTyped } from 'react-typed';
 
@@ -27,7 +27,7 @@ import ExpenseCard from './ExpenseCard';
 import Incomecard from './Incomecard';
 import ExpensePieChart from './ExpensePieChart';
 import SplitsView from './SplitsView';
-
+import Budgetpage from './Budgetpage';
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user._id || '';
@@ -48,6 +48,10 @@ const Dashboard = () => {
   const [showSplits, setShowSplits] = useState(false);
   const [showBudget, setShowBudget] = useState(false);
   const [bud, setBud] = useState('');
+  const [budget, setBudget] = useState(false);
+
+  // Add useRef for profile dropdown
+  const profileRef = useRef(null);
 
   const SYSTEM_PROMPT = `
 You are a Certified Financial Analyst AI. Generate executive reports with these mandatory sections:
@@ -111,6 +115,23 @@ Formatting:
 - Use bullet points & indentation
 - Comparisons in parentheses (MoM ▲15%)
 `;
+
+  // Add useEffect for click outside functionality
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
+      }
+    };
+
+    if (showProfile) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProfile]);
 
   useEffect(() => {
     const generateBudget = async () => {
@@ -396,7 +417,7 @@ Formatting:
               <CreditCard size={16} />
               View Splits
             </button>
-            <div className="relative">
+            <div className="relative" ref={profileRef}>
               <FaUserCircle
                 onClick={() => setShowProfile(!showProfile)}
                 size={30}
@@ -407,12 +428,17 @@ Formatting:
                   <UserProfile
                     addIncome={addIncome}
                     setAddIncome={setAddIncome}
+                    budget={budget}
+                    setBudget={setBudget}
                   />
                   {addIncome && (
                     <AddIncome
                       addIncome={addIncome}
                       setAddIncome={setAddIncome}
                     />
+                  )}
+                  {budget && (
+                    <Budgetpage budget={budget} setBudget={setBudget} />
                   )}
                 </div>
               )}

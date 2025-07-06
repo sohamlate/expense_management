@@ -13,7 +13,6 @@ const IncomeCard = ({ income }) => {
     category,
     date,
     description,
-    isSettled,
     _id
   } = income;
 
@@ -77,15 +76,7 @@ const IncomeCard = ({ income }) => {
             </div>
           )}
           
-          {isSettled !== undefined && (
-            <div className={`ml-auto px-2 py-0.5 rounded-full text-xs ${
-              isSettled 
-                ? 'bg-green-100 text-green-800' 
-                : 'bg-yellow-50 text-yellow-700'
-            }`}>
-              {isSettled ? 'Processed' : 'Pending'}
-            </div>
-          )}
+          
         </div>
       </div>
       
@@ -98,14 +89,7 @@ const IncomeCard = ({ income }) => {
           Details
         </button> */}
 
-        {!isSettled && (
-          <button 
-            className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
-            onClick={() => console.log('Mark as processed', _id)}
-          >
-            Process
-          </button>
-        )}
+        
       </div>
     </div>
   );
