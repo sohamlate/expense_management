@@ -112,7 +112,7 @@ class AuthController {
   // Start new user registration flow
   async startRegistration(user) {
     try {
-      console.log("REG ERROR", user);
+      // console.log("REG ERROR", user);
       if (user.inProgressData?.email) {
         // user.currState = "INITMENU";
         user.email = user.inProgressData?.email;
