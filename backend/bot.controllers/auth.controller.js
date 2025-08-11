@@ -255,7 +255,7 @@ class AuthController {
         this.handler.getMainKeyboard()
       );
     } catch (error) {
-      logger.error("Registration completion failed:", error);
+      console.log("Registration completion failed:", error);
       this.handler.sendMessage(user.chatId, "🚨 Error completing registration");
     }
   }

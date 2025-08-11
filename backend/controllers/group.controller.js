@@ -1,6 +1,4 @@
 const Group = require("../models/group.model");
-
-
 const User = require("../models/user.model");
 
 
@@ -24,6 +22,7 @@ exports.createGroup = async (req, res) => {
 
 exports.getGroupMembers = async (req, res) => {
     try {
+      console.log("requested this ");
       const { groupId } = req.params;
   
       const group = await Group.findById(groupId).populate("members", "name email");
@@ -69,24 +68,34 @@ exports.getGroupById = async (req, res) => {
 
 exports.updateGroup = async (req, res) => {
   try {
-    const { name, description, members , groupId} = req.body;
-    
+    const { name, description, members, groupId } = req.body;
+    console.log(req.body);
+    const users = await User.find({ email: { $in: members } }).select('_id');
+
+    const memberIds = users.map(user => user._id);
+    console.log("members",memberIds)
     const updatedGroup = await Group.findByIdAndUpdate(
-      req.params.id,
-      { name, description, members },
+      groupId,
+      { name, description, members: memberIds },
       { new: true, runValidators: true }
     );
-    console.log(132);
 
+    // console.log("updates",updatedGroup);
     if (!updatedGroup) {
       return res.status(404).json({ success: false, message: "Group not found" });
     }
 
-    res.status(200).json({ success: true, message: "Group updated successfully", updatedGroup });
+    res.status(200).json({
+      success: true,
+      message: "Group updated successfully",
+      updatedGroup
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 exports.deleteGroup = async (req, res) => {
@@ -122,4 +131,3 @@ exports.getGroupsByUserId = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-

@@ -2,45 +2,66 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
 
-const EditGroup = ({ group, editform, setEditForm }) => {
-  const user = JSON.parse(localStorage.getItem('user'));
-  const userId = user._id || '';
-
+const EditGroup = ({ group, editform, setEditForm, user }) => {
+  
+  const userId = user?._id || '';
+  const groupId = group._id || '';
+  
   const [groupData, setGroupData] = useState({
     name: '',
     description: '',
     members: [],
+    groupId: group._id,
     createdBy: userId
   });
-
+  
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  // Initialize form with group data from props
+
+  const extractEmail = (member) => {
+    if (typeof member === 'string') {
+      return member;
+    }
+    if (member && typeof member === 'object') {
+      return member.email || '';
+    }
+    return '';
+  };
+
+  
   useEffect(() => {
     if (group) {
+    
+      const memberEmails = group.members ? 
+        group.members
+          .map(member => extractEmail(member))
+          .filter(email => email && email.trim() !== '') 
+        : [];
+
       setGroupData({
         name: group.name || '',
         description: group.description || '',
-        members: group.members || [],
+        members: memberEmails, 
+        groupId: group._id || groupId,
         createdBy: group.createdBy || userId
       });
     }
-  }, [group, userId]);
+  }, [group, userId, groupId]);
 
-  // Handle input changes
-  const handleChange = e => {
+  
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setGroupData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Email validation function
-  const isValidEmail = email => {
+
+  const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  // Add email to members array
-  const handleAddEmail = e => {
+
+  const handleAddEmail = (e) => {
     e.preventDefault();
 
     if (!email.trim()) {
@@ -48,43 +69,44 @@ const EditGroup = ({ group, editform, setEditForm }) => {
       return;
     }
 
-    if (!isValidEmail(email)) {
+    if (!isValidEmail(email.trim())) {
       setError('Please enter a valid email address');
       return;
     }
 
-    if (groupData.members.some(member => 
-      (typeof member === 'string' && member === email) || 
-      (member.email && member.email === email)
+    const trimmedEmail = email.trim().toLowerCase();
+
+
+    if (groupData.members.some(memberEmail => 
+      memberEmail.toLowerCase() === trimmedEmail
     )) {
       setError('This email is already added');
       return;
     }
 
+  
     setGroupData(prev => ({
       ...prev,
-      members: [...prev.members, email]
+      members: [...prev.members, email.trim()]
     }));
 
     setEmail('');
     setError('');
   };
 
-  const handleRemoveEmail = emailToRemove => {
+
+  const handleRemoveEmail = (emailToRemove) => {
     setGroupData(prev => ({
       ...prev,
-      members: prev.members.filter(member => 
-        (typeof member === 'string' && member !== emailToRemove) || 
-        (member.email && member.email !== emailToRemove)
-      )
+      members: prev.members.filter(memberEmail => memberEmail !== emailToRemove)
     }));
   };
 
-  // Form submission
-  const handleSubmit = async e => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form data
+
     if (!groupData.name.trim()) {
       setError('Group name is required');
       return;
@@ -96,67 +118,60 @@ const EditGroup = ({ group, editform, setEditForm }) => {
     }
 
     try {
+      console.log("Sending group data:", groupData);
+      
       const response = await axios.put(
-        `https://expense-management-seven-plum.vercel.app/api/group/${group._id}`,
-        groupData
+        `http://localhost:5000/api/group/${group._id}`,
+        {
+          ...groupData,
+          name: groupData.name.trim(),
+          description: groupData.description.trim(),
+      
+          members: [...new Set(groupData.members.filter(email => 
+            email && email.trim() && isValidEmail(email.trim())
+          ))]
+        }
       );
-      console.log(response, 'Update response');
+      
+      console.log('Update response:', response);
 
       setError('');
       alert('Group updated successfully!');
-      setEditForm(false);  // Fixed from setEditGroupForm
+      setEditForm(false);
     } catch (err) {
       console.error('Error updating group:', err);
-      setError('Failed to update group. Please try again.');
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Failed to update group. Please try again.');
+      }
     }
   };
 
-  // Render email or member
-  const renderMemberItem = (member, index) => {
-    // If member is a string (email)
-    if (typeof member === 'string') {
-      return (
-        <li key={index} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-2">
-          <div className="flex items-center">
-            <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 text-white">
-              {member.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-gray-700">{member}</span>
-          </div>
-          <button 
-            onClick={() => handleRemoveEmail(member)}
-            className="text-red-500 hover:text-red-700"
-            type="button"
-          >
-            <X size={18} />
-          </button>
-        </li>
-      );
+
+  const renderMemberItem = (memberEmail, index) => {
+    if (!memberEmail || typeof memberEmail !== 'string') {
+      return null;
     }
-    // If member is an object with name and/or email
-    else if (member && (member.name || member.email)) {
-      const displayText = member.name || member.email;
-      const firstLetter = displayText.charAt(0).toUpperCase();
-      
-      return (
-        <li key={member._id || index} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-2">
-          <div className="flex items-center">
-            <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 text-white">
-              {firstLetter}
-            </div>
-            <span className="text-gray-700">{displayText}</span>
+
+    return (
+      <li key={index} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg mb-2">
+        <div className="flex items-center">
+          <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-400 to-purple-400 text-white">
+            {memberEmail.charAt(0).toUpperCase()}
           </div>
-          <button 
-            onClick={() => handleRemoveEmail(member.email)}
-            className="text-red-500 hover:text-red-700"
-            type="button"
-          >
-            <X size={18} />
-          </button>
-        </li>
-      );
-    }
-    return null;
+          <span className="text-gray-700">{memberEmail}</span>
+        </div>
+        <button 
+          onClick={() => handleRemoveEmail(memberEmail)}
+          className="text-red-500 hover:text-red-700 focus:outline-none"
+          type="button"
+          aria-label={`Remove ${memberEmail}`}
+        >
+          <X size={18} />
+        </button>
+      </li>
+    );
   };
 
   return (
@@ -167,10 +182,13 @@ const EditGroup = ({ group, editform, setEditForm }) => {
             <h2 className="font-poppins text-2xl font-bold text-gray-800">
               Edit Group
             </h2>
-            <X 
-              className="bg-red-500 text-white rounded-full p-1 hover:scale-110 hover:bg-red-600 transition-all duration-150 cursor-pointer" 
-              onClick={() => setEditForm(!editform)}
-            />
+            <button
+              onClick={() => setEditForm(false)}
+              className="bg-red-500 text-white rounded-full p-1 hover:scale-110 hover:bg-red-600 transition-all duration-150 cursor-pointer focus:outline-none"
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="font-poppins">
@@ -189,6 +207,7 @@ const EditGroup = ({ group, editform, setEditForm }) => {
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 p-3 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter group name"
+                required
               />
             </div>
 
@@ -217,9 +236,14 @@ const EditGroup = ({ group, editform, setEditForm }) => {
                 <input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="flex-grow rounded-l-lg border border-gray-300 p-3 transition-all focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter email address"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAddEmail(e);
+                    }
+                  }}
                 />
                 <button
                   onClick={handleAddEmail}
@@ -252,13 +276,15 @@ const EditGroup = ({ group, editform, setEditForm }) => {
                 Add email addresses of group members
               </p>
 
-              {/* Display members list */}
+           
               {groupData.members && groupData.members.length > 0 ? (
                 <div className="mt-4">
-                  <h3 className="font-medium text-gray-700 mb-2">Current Members:</h3>
+                  <h3 className="font-medium text-gray-700 mb-2">
+                    Current Members ({groupData.members.length}):
+                  </h3>
                   <ul className="space-y-1 max-h-48 overflow-y-auto">
-                    {groupData.members.map((member, index) => 
-                      renderMemberItem(member, index)
+                    {groupData.members.map((memberEmail, index) => 
+                      renderMemberItem(memberEmail, index)
                     )}
                   </ul>
                 </div>
@@ -278,6 +304,7 @@ const EditGroup = ({ group, editform, setEditForm }) => {
               <button
                 type="submit"
                 className="rounded-lg bg-green-600 px-6 py-2.5 font-medium text-white shadow-sm transition-all hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                disabled={groupData.members.length === 0 || !groupData.name.trim()}
               >
                 Update Group
               </button>
