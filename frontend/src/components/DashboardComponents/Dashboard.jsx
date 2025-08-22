@@ -137,7 +137,7 @@ Formatting:
     const generateBudget = async () => {
       try {
         const genAI = new GoogleGenerativeAI(
-          'AIzaSyDqlHWwCII7vLdhdLQ9h9w8y5kW_INHiM0'
+          'AIzaSyBMECrmLu_3smRUrd-nkblMHOqeL9W-zHI'
         );
         const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 

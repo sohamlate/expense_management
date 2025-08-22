@@ -191,7 +191,7 @@ async handleCommand(user, command) {
   async sendMessage(chatId, text, replyMarkup) {
     try {
       await axios.post(
-        `https://api.telegram.org/bot${this.botToken}/sendMessage`,
+        `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`,
         {
           chat_id: chatId,
           text,
@@ -199,7 +199,7 @@ async handleCommand(user, command) {
         }
       );
     } catch (error) {
-      logger.error("Message sending failed:", error);
+      console.error("Message sending failed:", error);
     }
   }
 

@@ -25,7 +25,7 @@ exports.sendOtp = async (req, res) => {
     );
 
     await transporter.sendMail({
-      from: "sohamslate2004@gmail.com",
+      from: "sohamlate65@gmail.com",
       to: email,
       subject: "Your OTP Code",
       text: `Your OTP is ${otp}. It is valid for 10 minutes.`,

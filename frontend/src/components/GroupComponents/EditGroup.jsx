@@ -121,7 +121,7 @@ const EditGroup = ({ group, editform, setEditForm, user }) => {
       console.log("Sending group data:", groupData);
       
       const response = await axios.put(
-        `http://localhost:5000/api/group/${group._id}`,
+        `https://expense-management-seven-plum.vercel.app/api/group/${group._id}`,
         {
           ...groupData,
           name: groupData.name.trim(),
